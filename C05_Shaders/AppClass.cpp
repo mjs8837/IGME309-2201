@@ -9,6 +9,7 @@ void AppClass::Run(void)
 	//Initialize the system with the fields recollected by the constructor
 	Init();
 	
+	//Testing
 	//Set the background color
 	glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
 
