@@ -3,15 +3,24 @@
 in vec3 Color;
 
 uniform vec3 SolidColor = vec3(-1,-1,-1);
+uniform bool Complimentary = false;
 
 out vec4 Fragment;
 
 void main()
 {
-	Fragment = vec4(Color,1);
-	
+	vec3 output = Color;
 	if(SolidColor.r != -1.0 && SolidColor.g != -1.0 && SolidColor.b != -1.0)
-		Fragment = vec4(SolidColor, 1);
-
+	{
+		output = SolidColor;
+	}
+	
+	if(Complimentary == true)
+	{
+		output = vec3(1.0f, 1.0f, 1.0f) - output;
+	}
+	
+	Fragment = vec4(output,1);
+		
 	return;
 }
