@@ -3,8 +3,8 @@ void Application::InitVariables(void)
 {
 	//Make MyMesh object
 	m_pMesh = new MyMesh();
-	//Generate a circle
-	m_pMesh->GenerateCircle(2.0f, 5, C_RED);
+	//Generating a circle with a radius of 3, 12 subdivisions, and the color blue
+	m_pMesh->GenerateCircle(3.0f, 12, C_BLUE);
 }
 void Application::Update(void)
 {
