@@ -275,14 +275,33 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> baseVertex;
+
+	//Setting a start angle of 0 and setting the change equal to the angle of a full circle / the number of subdivisions
+	GLfloat startAngle = 0;
+	GLfloat angleChange = (2 * PI) / a_nSubdivisions;
+
+	//Looping based on the number of subdivisions and adding a vector3 to the vertex vector
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		//Creating a vector based on the angle and the radius to be added to the vertex vector
+	    vector3 tempBase = vector3(cos(startAngle) * a_fRadius, sin(startAngle) * a_fRadius, -a_fHeight / 2);
+		baseVertex.push_back(tempBase);
+		startAngle += angleChange;
+	}
+
+	//Loopoing through based on the the number of subdivisions and drawing the triangles required to draw the cone
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		AddTri(baseVertex[i], vector3(0, 0, -a_fHeight / 2), baseVertex[(i + 1) % a_nSubdivisions]);
+		AddTri(baseVertex[i], baseVertex[(i + 1) % a_nSubdivisions], vector3(0, 0, a_fHeight / 2));
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+
 void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
 {
 	if (a_fRadius < 0.01f)
@@ -299,14 +318,39 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> baseVertex;
+
+	//Setting a start angle of 0 and setting the change equal to the angle of a full circle / the number of subdivisions
+	GLfloat startAngle = 0;
+	GLfloat angleChange = (2 * PI) / a_nSubdivisions;
+
+	//Looping based on the number of subdivisions and adding a vector3 to the vertex vector
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		//Creating a vector based on the angle and the radius to be added to the vertex vector
+		vector3 tempBase = vector3(cos(startAngle) * a_fRadius, sin(startAngle) * a_fRadius, -a_fHeight / 2);
+		baseVertex.push_back(tempBase);
+		startAngle += angleChange;
+	}
+
+	//Loopoing through based on the the number of subdivisions and drawing the triangles and quads required to draw the cylinder 
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		AddTri(baseVertex[i], vector3(0, 0, -a_fHeight / 2), baseVertex[(i + 1) % a_nSubdivisions]);
+		AddTri(baseVertex[i], baseVertex[(i + 1) % a_nSubdivisions], vector3(0, 0, -a_fHeight / 2));
+
+		AddQuad(baseVertex[i], vector3(baseVertex[i].x, baseVertex[i].y, a_fHeight / 2), baseVertex[(i + 1) % a_nSubdivisions], vector3(baseVertex[(i + 1) % a_nSubdivisions].x, baseVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2));
+		AddQuad(baseVertex[i], baseVertex[(i + 1) % a_nSubdivisions], vector3(baseVertex[i].x, baseVertex[i].y, a_fHeight / 2), vector3(baseVertex[(i + 1) % a_nSubdivisions].x, baseVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2));
+
+		AddTri(vector3(baseVertex[i].x, baseVertex[i].y, a_fHeight / 2), vector3(baseVertex[(i + 1) % a_nSubdivisions].x, baseVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2), vector3(0, 0, a_fHeight / 2));
+		AddTri(vector3(baseVertex[i].x, baseVertex[i].y, a_fHeight / 2), vector3(0, 0, a_fHeight / 2), vector3(baseVertex[(i + 1) % a_nSubdivisions].x, baseVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2));
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+
 void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fHeight, int a_nSubdivisions, vector3 a_v3Color)
 {
 	if (a_fOuterRadius < 0.01f)
@@ -329,14 +373,44 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	std::vector<vector3> outerVertex;
+	std::vector<vector3> innerVertex;
+
+	//Setting a start angle of 0 and setting the change (delta) equal to the angle of a full circle / the number of subdivisions
+	GLfloat startAngle = 0;
+	GLfloat angleChange = (2 * PI) / a_nSubdivisions;
+
+	//Looping based on the number of subdivisions and adding a vector3 to the vertex vector
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		//Creating a vector based on the angle and the outer radius to be added to the vertex vector
+		vector3 outerBase = vector3(cos(startAngle) * a_fOuterRadius, sin(startAngle) * a_fOuterRadius, -a_fHeight / 2);
+		outerVertex.push_back(outerBase);
+
+		//Creating a vector based on the angle and the inner radius to be added to the vertex vector
+		vector3 innerBase = vector3(cos(startAngle) * a_fInnerRadius, sin(startAngle) * a_fInnerRadius, -a_fHeight / 2);
+		innerVertex.push_back(innerBase);
+		startAngle += angleChange;
+	}
+
+	//Loopoing through based on the the number of subdivisions and drawing the quads required to draw the cylinder 
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		AddQuad(outerVertex[i], innerVertex[i], outerVertex[(i + 1) % a_nSubdivisions], innerVertex[(i + 1) % a_nSubdivisions]);
+		AddQuad(outerVertex[i], outerVertex[(i + 1) % a_nSubdivisions], innerVertex[i], innerVertex[(i + 1) % a_nSubdivisions]);
+
+		AddQuad(outerVertex[i], vector3(outerVertex[i].x, outerVertex[i].y, a_fHeight / 2), outerVertex[(i + 1) % a_nSubdivisions], vector3(outerVertex[(i + 1) % a_nSubdivisions].x, outerVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2));
+		AddQuad(outerVertex[i], outerVertex[(i + 1) % a_nSubdivisions], vector3(outerVertex[i].x, outerVertex[i].y, a_fHeight / 2), vector3(outerVertex[(i + 1) % a_nSubdivisions].x, outerVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2));
+
+		AddQuad(vector3(outerVertex[i].x, outerVertex[i].y, a_fHeight / 2), vector3(innerVertex[i].x, innerVertex[i].y, a_fHeight / 2), vector3(outerVertex[(i + 1) % a_nSubdivisions].x, outerVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2), vector3(innerVertex[(i + 1) % a_nSubdivisions].x, innerVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2));
+		AddQuad(vector3(outerVertex[i].x, outerVertex[i].y, a_fHeight / 2), vector3(outerVertex[(i + 1) % a_nSubdivisions].x, outerVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2), vector3(innerVertex[i].x, innerVertex[i].y, a_fHeight / 2), vector3(innerVertex[(i + 1) % a_nSubdivisions].x, innerVertex[(i + 1) % a_nSubdivisions].y, a_fHeight / 2));
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+
 void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSubdivisionsA, int a_nSubdivisionsB, vector3 a_v3Color)
 {
 	if (a_fOuterRadius < 0.01f)
@@ -361,14 +435,44 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//Creating a 2D vector containing a vector3 based on the number of subdivisions in both directions
+	std::vector<std::vector<vector3>> vertex(a_nSubdivisionsA, std::vector<vector3>(a_nSubdivisionsB));
+
+	//Setting the necessary values for the parametric formulas of a torus
+	float c = 0.5f * (a_fOuterRadius - a_fInnerRadius) + a_fOuterRadius;
+	float a = a_fOuterRadius - a_fInnerRadius;
+
+	GLfloat u = 0;
+	GLfloat v = 0;
+	GLfloat angleChangeU = (2 * PI) / a_nSubdivisionsA;
+	GLfloat angleChangeV = (2 * PI) / a_nSubdivisionsB;
+
+	//Creating a nested for loop to fill the 2D vector and modify each angle based on the current iteration
+	for (int i = 0; i < a_nSubdivisionsA; i++)
+	{
+		for (int j = 0; j < a_nSubdivisionsB; j++)
+		{
+			vector3 tempTorus = vector3((c + a * cos(v)) * cos(u), (c + a * cos(v)) * sin(u), a * sin(v));
+			v += angleChangeV;
+			vertex[i][j] = tempTorus;
+		}
+		u += angleChangeU;
+	}
+
+	//Creating a nested for loop to draw the quads necessary to draw the torus
+	for (int i = 0; i < a_nSubdivisionsA; i++)
+	{
+		for (int j = 0; j < a_nSubdivisionsB; j++)
+		{
+			AddQuad(vertex[j][i], vertex[(j + 1) % a_nSubdivisionsB][i], vertex[j][(i + 1) % a_nSubdivisionsB], vertex[(j + 1) % a_nSubdivisionsB][(i + 1) % a_nSubdivisionsB]);
+		}
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+
 void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Color)
 {
 	if (a_fRadius < 0.01f)
@@ -386,9 +490,37 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	//Creating a 2D vector containing a vector3 based on the number of subdivisions
+	std::vector<std::vector<vector3>> vertex(a_nSubdivisions, std::vector<vector3>(a_nSubdivisions));
+
+	//Setting the necessary value for the parametric formulas of a sphere
+	float a = a_fRadius;
+
+	GLfloat u = 0;
+	GLfloat v = 0;
+	GLfloat angleChangeU = (2 * PI) / a_nSubdivisions;
+	GLfloat angleChangeV = PI / a_nSubdivisions;
+
+	//Creating a nested for loop to fill the 2D vector and modify each angle based on the current iteration
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		for (int j = 0; j < a_nSubdivisions; j++)
+		{
+			vector3 tempSphere = vector3(a * cos(u) * sin(v), a * sin(u) * sin(v), a * cos(v));
+			u += angleChangeU;
+			vertex[i][j] = tempSphere;
+		}
+		v += angleChangeV;
+	}
+
+	//Creating a nested for loop to draw the quads necessary to draw the sphere
+	for (int i = 0; i < a_nSubdivisions; i++)
+	{
+		for (int j = 0; j < a_nSubdivisions; j++)
+		{
+			AddQuad(vertex[i][j], vertex[(i + 1) % a_nSubdivisions][j], vertex[i][(j + 1) % a_nSubdivisions], vertex[(i + 1) % a_nSubdivisions][(j + 1) % a_nSubdivisions]);
+		}
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
