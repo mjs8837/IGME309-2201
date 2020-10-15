@@ -368,7 +368,19 @@ void Application::CameraRotation(float a_fSpeed)
 		fDeltaMouse = static_cast<float>(MouseY - CenterY);
 		fAngleX += fDeltaMouse * a_fSpeed;
 	}
-	//Change the Yaw and the Pitch of the camera
+	
+	// setting up the vectors necessary for rotation
+	vector3 a_v3Forward = glm::normalize(m_pCamera->GetTarget() - m_pCamera->GetPosition());
+	vector3 a_v3Up = glm::normalize(m_pCamera->GetAbove() - m_pCamera->GetPosition());
+	vector3 a_v3Right = glm::normalize(glm::cross(a_v3Up, a_v3Forward));
+
+	// using quaternions to avoid gimble locking and rotate about the correct axis
+	quaternion q1 = glm::angleAxis(-fAngleX, a_v3Right);
+	quaternion q2 = glm::angleAxis(-fAngleY, a_v3Up);
+
+	// setting the target based on the quaternions
+	m_pCamera->SetTarget(m_pCamera->GetTarget() * q1 * q2);
+
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
 //Keyboard
@@ -386,10 +398,31 @@ void Application::ProcessKeyboard(void)
 	if (fMultiplier)
 		fSpeed *= 5.0f;
 
+	// creating all the cases for moving up, down, left, right, forward, and backwards
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+	{
 		m_pCamera->MoveForward(fSpeed);
+	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+	{
 		m_pCamera->MoveForward(-fSpeed);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+	{
+		m_pCamera->MoveSideways(-fSpeed);
+	}
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+	{
+		m_pCamera->MoveSideways(fSpeed);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+	{
+		m_pCamera->MoveVertical(-fSpeed);
+	}
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+	{
+		m_pCamera->MoveVertical(fSpeed);
+	}
 #pragma endregion
 }
 //Joystick
